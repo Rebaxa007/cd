@@ -3,16 +3,28 @@
 #include <stdbool.h>
 
 #define MAX_STATES 10
-#define MAX_ALPHABET 2
+#define MAX_ALPHABET 10
 
 // Transition table
 int transition[MAX_STATES][MAX_ALPHABET];
+char alphabet[MAX_ALPHABET];
+int num_symbols;
 
 // DFA components
 int num_states;
 int num_final_states;
 int final_states[MAX_STATES];
 int start_state;
+
+// Function to get the index of a symbol in the alphabet
+int get_symbol_index(char symbol) {
+    for (int i = 0; i < num_symbols; i++) {
+        if (alphabet[i] == symbol) {
+            return i;
+        }
+    }
+    return -1; // Symbol not found
+}
 
 // Function to simulate DFA
 bool simulate_dfa(char *input) {
@@ -21,8 +33,7 @@ bool simulate_dfa(char *input) {
     for (int i = 0; i < strlen(input); i++) {
         char symbol = input[i];
 
-        // Map 'a' -> 0, 'b' -> 1
-        int symbol_index = (symbol == 'a') ? 0 : (symbol == 'b') ? 1 : -1;
+        int symbol_index = get_symbol_index(symbol);
 
         if (symbol_index == -1) {
             printf("Invalid character '%c' in input.\n", symbol);
@@ -61,27 +72,49 @@ int main() {
         scanf("%d", &final_states[i]);
     }
 
+    // Input alphabet
+    printf("Enter the number of symbols in the alphabet: ");
+    scanf("%d", &num_symbols);
+
+    printf("Enter the symbols in the alphabet: ");
+    for (int i = 0; i < num_symbols; i++) {
+        scanf(" %c", &alphabet[i]);
+    }
+
     // Input DFA transition table
     printf("Enter the DFA transition table:\n");
     printf("Format: current_state input_symbol next_state\n");
 
-    for (int i = 0; i < num_states * 2; i++) { // Assuming 2 symbols ('a' and 'b')
+    for (int i = 0; i < num_states * num_symbols; i++) {
         int current_state, next_state;
         char input_symbol;
 
         scanf("%d %c %d", &current_state, &input_symbol, &next_state);
 
-        // Map 'a' -> 0, 'b' -> 1
-        int symbol_index = (input_symbol == 'a') ? 0 : 1;
+        int symbol_index = get_symbol_index(input_symbol);
+
+        if (symbol_index == -1) {
+            printf("Invalid symbol '%c' in transition table.\n", input_symbol);
+            return 1;
+        }
 
         transition[current_state][symbol_index] = next_state;
     }
 
     // Display the transition table
     printf("\nDFA Transition Table:\n");
-    printf("State\t'a'\t'b'\n");
+    printf("State\t");
+    for (int i = 0; i < num_symbols; i++) {
+        printf("%c\t", alphabet[i]);
+    }
+    printf("\n");
+
     for (int i = 0; i < num_states; i++) {
-        printf("%d\t%d\t%d\n", i, transition[i][0], transition[i][1]);
+        printf("%d\t", i);
+        for (int j = 0; j < num_symbols; j++) {
+            printf("%d\t", transition[i][j]);
+        }
+        printf("\n");
     }
 
     // Input string to check
